@@ -38,9 +38,12 @@ loader.classList.add('visible');
 
 fetchBreeds()
   .then(data => {
-    console.log(data);
-    optionsContainer.innerHTML =
-      `<option data-placeholder="true"></option>` + optionsMarkup(data);
+    if (Array.isArray(data) && data.length > 0) {
+      optionsContainer.innerHTML =
+        `<option data-placeholder="true"></option>` + optionsMarkup(data);
+    } else {
+      optionsContainer.innerHTML = '';
+    }
   })
   .then(() => {
     new SlimSelect({

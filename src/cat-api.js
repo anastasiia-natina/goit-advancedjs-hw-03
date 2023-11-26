@@ -18,8 +18,9 @@ export function fetchBreeds() {
     .then(response => response.data)
     .catch(error => {
       console.error(`Error fetching breeds: ${error}`);
-      return [];
+      return Promise.resolve([]);
     });
+  
 }
 
 export function fetchCatByBreed(id) {

@@ -1,6 +1,7 @@
 import { fetchBreeds, fetchCatByBreed } from './cat-api';
 import SlimSelect from 'slim-select';
 import '../node_modules/slim-select/dist/slimselect.css';
+import iziToast from 'izitoast';
 
 const optionsContainer = document.querySelector('.breed-select');
 const infoContainer = document.querySelector('.cat-info');
@@ -70,6 +71,16 @@ fetchBreeds()
     loader.classList.add('invisible');
     document.getElementById('single').classList.remove('invisible');
   })
-   .catch(error =>
-    console.error(`Error occurred: ${error}`)
-  );
+  .catch(error => {
+    loader.classList.add('invisible');
+    console.error(`Error occurred: ${error}`);
+    optionsContainer.innerHTML = '<option>Error loading breeds. Please try again later.</option>';
+
+    iziToast.error({
+      title: 'Error!',
+      message: 'Oops! Something went wrong while loading breeds.',
+      position: 'topRight',
+   });
+  });
+
+  

@@ -24,8 +24,11 @@ export function fetchBreeds() {
 }
 
 export function fetchCatByBreed(id) {
-  return axiosInstance.get(`/images/${id}`)
-    .then(response => response.data)
+  return axiosInstance.get(`/images/search?breed_ids=${id}&api_key${API_KEY}`)
+    .then(response => {
+      
+      return response.data
+})
     .catch(error => {
       throw new Error(error.response.statusText);
     });

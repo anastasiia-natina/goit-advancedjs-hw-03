@@ -2,6 +2,7 @@ import { fetchBreeds, fetchCatByBreed } from './cat-api';
 import SlimSelect from 'slim-select';
 import '../node_modules/slim-select/dist/slimselect.css';
 import iziToast from 'izitoast';
+import 'izitoast/dist/css/iziToast.css';
 
 const optionsContainer = document.querySelector('.breed-select');
 const infoContainer = document.querySelector('.cat-info');
@@ -10,8 +11,8 @@ const loader = document.querySelector('.loader');
 function optionsMarkup(data) {
   return data
     .map(item => {
-      const { name, reference_image_id } = item;
-      return `<option value="${reference_image_id}">${name}</option>`;
+      const { name, id } = item;
+      return `<option value="${id}">${name}</option>`;
     })
     .join('');
 }
@@ -22,8 +23,7 @@ function catMarkup(cat) {
     breeds: {
       0: { description, temperament, name },
     },
-  } = cat;
-  loader.classList.remove('visible');
+  } = cat[0];
     return `<h2>${name}</h2>
   <div class="info-container">
   <img width="500" src="${url}" class="cat-image">
@@ -35,13 +35,12 @@ function catMarkup(cat) {
   </div>`;
 }
 
-loader.classList.add('visible');
-
 fetchBreeds()
   .then(data => {
     if (Array.isArray(data) && data.length > 0) {
       optionsContainer.innerHTML =
         `<option data-placeholder="true"></option>` + optionsMarkup(data);
+      loader.style.visibility = 'hidden'; 
     } else {
       optionsContainer.innerHTML = '';
     }
@@ -54,33 +53,38 @@ fetchBreeds()
       },
       events: {
         afterChange: () => {
-          infoContainer.classList.add('invisible');
-          loader.classList.remove('invisible');
+          infoContainer.style.visibility = 'hidden';
+          loader.style.visibility = 'visible'; 
           fetchCatByBreed(optionsContainer.value)
-            .then(cat => (infoContainer.innerHTML = catMarkup(cat)))
-            .then(() => {
-              loader.classList.add('invisible');
-              infoContainer.classList.remove('invisible');
+            .then(cat => {
+              loader.style.visibility = 'hidden';
+              infoContainer.style.visibility = 'visible';
+              infoContainer.innerHTML = catMarkup(cat);
+
+              if (cat.length === 0) {
+                optionsContainer.innerHTML = '';
+                iziToast.error({
+                  title: 'Error!',
+                  message: 'Oops! Something went wrong while loading breeds.',
+                  position: 'topRight',
+                });
+                return;
+              }
             })
-            .catch(error =>
-              console.error(`Error occurred: ${error}`)
-            );
+            .catch(error => {
+              loader.style.visibility = 'hidden'; 
+              infoContainer.style.visibility = 'hidden';
+              console.error(`Error occurred: ${error}`);
+              iziToast.error({
+                title: 'Error!',
+                message: 'Oops! Something went wrong while loading the cat.',
+                position: 'topRight',
+              });
+            });
         },
       },
     });
-    loader.classList.add('invisible');
-    document.getElementById('single').classList.remove('invisible');
   })
-  .catch(error => {
-    loader.classList.add('invisible');
-    console.error(`Error occurred: ${error}`);
-    optionsContainer.innerHTML = '<option>Error loading breeds. Please try again later.</option>';
-
-    iziToast.error({
-      title: 'Error!',
-      message: 'Oops! Something went wrong while loading breeds.',
-      position: 'topRight',
-   });
-  });
+  
 
   
